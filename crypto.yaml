@@ -1,0 +1,7 @@
+tickers:
+- BTC-USD
+- ETH-USD
+- BNB-USD
+- SOL-USD
+- XRP-USD
+dock_position: top
