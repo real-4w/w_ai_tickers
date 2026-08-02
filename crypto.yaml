@@ -4,4 +4,4 @@ tickers:
 - BNB-USD
 - SOL-USD
 - XRP-USD
-dock_position: top
+dock_position: bottom
