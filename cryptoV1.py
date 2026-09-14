@@ -481,35 +481,35 @@ class CryptoTape:
             return
 
         x = 0.0
-        for _ in range(2):
-            for txt, fg in entries:
-                tid = self.canvas.create_text(
-                    x,
-                    self.window_height // 2,
-                    text=txt,
-                    font=FONT,
-                    fill=fg,
-                    anchor="w",
-                    tags=("ticker",),
-                )
-                b = self.canvas.bbox(tid)
-                w = float(b[2] - b[0] + 1) if b else 70.0
-                x += w + SPACER_PX
+        for txt, fg in entries:
+            tid = self.canvas.create_text(
+                x,
+                self.window_height // 2,
+                text=txt,
+                font=FONT,
+                fill=fg,
+                anchor="w",
+                tags=("ticker",),
+            )
+            b = self.canvas.bbox(tid)
+            w = float(b[2] - b[0] + 1) if b else 70.0
+            x += w + SPACER_PX
 
-                sid = self.canvas.create_text(
-                    x,
-                    self.window_height // 2,
-                    text=SEPARATOR,
-                    font=FONT,
-                    fill=WHITE,
-                    anchor="w",
-                    tags=("ticker",),
-                )
-                b = self.canvas.bbox(sid)
-                sw = float(b[2] - b[0] + 1) if b else 14.0
-                x += sw + SPACER_PX
+            sid = self.canvas.create_text(
+                x,
+                self.window_height // 2,
+                text=SEPARATOR,
+                font=FONT,
+                fill=WHITE,
+                anchor="w",
+                tags=("ticker",),
+            )
+            b = self.canvas.bbox(sid)
+            sw = float(b[2] - b[0] + 1) if b else 14.0
+            x += sw + SPACER_PX
 
-        self.content_width = x / 2.0
+        # One copy of the tape. Restart only after it has fully left the left edge.
+        self.content_width = x
         self.canvas.move("ticker", float(self.screen_width), 0.0)
         self.offset = 0.0
 
@@ -527,9 +527,12 @@ class CryptoTape:
         self.canvas.move("ticker", -self.scroll_speed, 0.0)
         self.offset -= self.scroll_speed
 
-        if self.offset <= -self.content_width:
-            self.canvas.move("ticker", self.content_width, 0.0)
-            self.offset += self.content_width
+        # Reset only once the last glyph has gone off the left edge; then
+        # place the tape just off the right edge again (no mid-screen jump).
+        cycle = self.content_width + float(self.screen_width)
+        if cycle > 0 and self.offset <= -cycle:
+            self.canvas.move("ticker", cycle, 0.0)
+            self.offset += cycle
 
         self.root.after(FRAME_INTERVAL_MS, self.animate)
 
