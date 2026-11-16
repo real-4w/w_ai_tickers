@@ -56,6 +56,11 @@ from typing import Optional
 import pandas as pd
 import yaml
 import yfinance as yf
+from curl_cffi import requests as curl_requests
+
+# Default yfinance SSL checks fail against fc.yahoo.com on this machine.
+session = curl_requests.Session(impersonate="chrome")
+session.verify = False
 
 
 # ----------------------------- Logging -----------------------------
@@ -328,6 +333,7 @@ class TickerTape:
                 group_by="ticker",
                 timeout=30,
                 auto_adjust=False,
+                session=session,
             )
         except Exception as e:
             logging.warning(f"yfinance batch download error: {e}")
@@ -371,7 +377,7 @@ class TickerTape:
 
             def _fetch_one(sym: str):
                 try:
-                    h = yf.Ticker(sym).history(period="5d")
+                    h = yf.Ticker(sym, session=session).history(period="5d")
                     p, c = self._compute_quote_from_history(h)
                     return sym, p, c
                 except Exception:
